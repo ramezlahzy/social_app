@@ -1,6 +1,6 @@
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {auth} from '../../firebase';
 import { API_BASE } from "../config";
 
 const API = axios.create({
@@ -13,7 +13,7 @@ const API = axios.create({
 
 API.interceptors.request.use(async (config) => {
   if (config.withToken) {
-    const token = await AsyncStorage.getItem("token")
+    const token = await auth.currentUser.getIdToken(true);
     if (token) {
       config.headers.Authorization = token;
     }

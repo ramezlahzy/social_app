@@ -5,6 +5,8 @@ const app = express();
 
 const userRoute = require('./routes/userRoute');
 const whatIlearnedRoute = require('./routes/whatilearnedRoute');
+const messageRoute = require('./routes/messageRoute');
+const notificationRoute = require('./routes/notificationRoute');
 const accessLog = require('./middleware/accessLog');
 const auth = require('./middleware/auth')
 const multer = require('multer');
@@ -28,6 +30,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use('/user', accessLog, userRoute);
 app.use('/whatIlearned', accessLog,  auth, whatIlearnedRoute);
 
+app.use('/message', accessLog, auth, messageRoute);
+
+app.use('/notification', accessLog, auth, notificationRoute);
 app.listen(config.PORT, () => {
   console.log(`Listening at http://localhost:${config.PORT}`);
 });

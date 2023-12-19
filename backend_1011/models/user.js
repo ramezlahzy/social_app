@@ -21,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    expoPushToken: {
+      type: DataTypes.STRING
+    },
     phoneNumber: {
       type: DataTypes.STRING
     },

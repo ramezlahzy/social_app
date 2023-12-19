@@ -63,6 +63,22 @@ export default ({ data, setChange, flag = true }) => {
   const [isFollowedFull, setIsFollowedFull] = useState(isFollowed);
   const [likesNumber, setLikesNumber] = useState(0);
   const [dislikesNumber, setDislikesNumber] = useState(0);
+  const [authorAvatar, setAuthorAvatar] = useState("");
+
+  const fetchUserAvatar = async () => {
+    try {
+      const response = await API.get(`user/getUserInfo?id=${author}`);
+      setAuthorAvatar(response.data.user.avatar);
+      // console.log("authorAvatar", response.data.user.avatar);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserAvatar();
+  }, []);
+
 
   const fetchLikesNumber = async () => {
     try {
@@ -70,16 +86,18 @@ export default ({ data, setChange, flag = true }) => {
         `whatIlearned/getAgreeUserList?whatIlearnedID=${JSON.stringify(id)}`
       );
       setLikesNumber(response.data.userList.length);
-      console.log("userId = ", user.id);
-      console.log("response.data.userList = ", response.data.userList);
+      // console.log("userId = ", user.id);
+      // console.log("response.data.userList = ", response.data.userList);
       if (response.data.userList.find((item) => item.userID === user.id)) {
         setAgreeFull(true);
       }
-      console.log("likesNumbers", response.data.userList.length);
+      // console.log("likesNumbers", response.data.userList.length);
     } catch (error) {
       console.log(error);
     }
   };
+
+  
   const fetchDislikesNumber = async () => {
     try {
       const response = await API.get(
@@ -89,8 +107,8 @@ export default ({ data, setChange, flag = true }) => {
       if (response.data.userList.find((item) => item.userID === user.id)) {
         setDisAgreeFull(true);
       }
-
-      console.log("dislikesNumber", response.data.userList.length);
+// 
+      // console.log("dislikesNumber", response.data.userList.length);
     } catch (error) {
       console.log(error);
     }
@@ -112,7 +130,7 @@ export default ({ data, setChange, flag = true }) => {
     API.get(`user/getUserInfo?id=${author}`)
       .then((res) => {
         setAuthorData(res.data.user);
-        console.log("authorData", res.data.user);
+        // console.log("authorData", res.data.user);
       })
       .catch((err) => {
         console.log("err");
@@ -130,13 +148,13 @@ export default ({ data, setChange, flag = true }) => {
       const response = await API.post("user/followUser", {
         followUserID: "" + author,
       });
-      console.log("response.data.message=   ", response.data.message);
-      // dispatch(setUser(response.data.user));
+      // console.log("response.data.message=   ", response.data.message);
+      dispatch(setUser(response.data.user));
       const message = response.data.message;
-      console.log(
-        "response.data.message === Unfollowed successfully",
-        message === "Unfollow successfully"
-      );
+      // console.log(
+      //   "response.data.message === Unfollowed successfully",
+      //   message === "Unfollow successfully"
+      // );
       if (message === "Unfollow successfully") {
         setIsFollowedFull(false);
       } else {
@@ -177,12 +195,10 @@ export default ({ data, setChange, flag = true }) => {
         }}
       >
         <View
-        style={
-          {
+        style={{
             margin: 10,
             gap: 10,
-          }
-        }
+          }}
         >
           <Image
             source={{ uri: IMG_URL + item.image }}
@@ -349,7 +365,7 @@ export default ({ data, setChange, flag = true }) => {
   };
 
   const reportAPI = async () => {
-    try {
+    try {      
       const response = await API.post("whatIlearned/reportWhatIlearned", {
         whatIlearnedID: "" + id,
       });
@@ -402,7 +418,7 @@ export default ({ data, setChange, flag = true }) => {
       const response = await API.get(
         `whatIlearned/getComment?whatIlearnedID=${id}`
       );
-      console.log("response.data.comments", response.data.comments);
+      // console.log("response.data.comments", response.data.comments);
       const tempCommentList = response.data.comments.map((comment) => {
         return {
           name: comment.User.fullName,
@@ -690,7 +706,7 @@ export default ({ data, setChange, flag = true }) => {
             </Text>
           </TouchableOpacity>
           <Image
-            source={{ uri: IMG_URL + AvatarImg }}
+            source={{ uri: IMG_URL + authorAvatar }}
             style={{
               borderWidth: 3,
               borderColor: isFollowedFull ? "#4388CC" : "#F31B1B",
@@ -980,7 +996,20 @@ export default ({ data, setChange, flag = true }) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                reportAPI();
+
+                Alert.alert("Confirm", "Do you really want to report", [
+                  {
+                    text: "Ok",
+                    onPress: () => {
+                      reportAPI();
+                    },
+                    style: "default",
+                  },
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                  },
+                ]);
               }}
               style={{
                 // flex: 1,

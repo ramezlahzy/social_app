@@ -21,7 +21,7 @@ import FriendProfile from "./friend_myprofile";
 
 export default () => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigate = useNavigation();
   const user = useSelector(selectUser);
   const route = useRoute();
   const freind = route.params;

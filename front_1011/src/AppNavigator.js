@@ -1,6 +1,5 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
 import { StyleSheet, Image } from "react-native";
 import { ToastProvider } from "react-native-toast-notifications";

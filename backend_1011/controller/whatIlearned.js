@@ -1,6 +1,7 @@
 const db = require("../models");
 const { Op } = require("sequelize");
-
+const {sendNotification} = require("./user");
+const { send } = require("./notification");
 const addWhatIlearned = async (req, res) => {
   try {
     const { content, shareWithFriend, shareWithWorldWide } = req.body;
@@ -15,12 +16,25 @@ const addWhatIlearned = async (req, res) => {
     });
     // Notify friends if shareWithFriend is true
     if (shareWithFriend) {
-      const friends = (req.user.friend ? req.user.friend : []).map(
-        (id) => parseInt(id.trim())
-      ); // Assuming you have a friends field in your User model
-
+      // const friends = (req.user.friend ? req.user.friend : []).map((id) =>
+      //   parseInt(id.trim())
+      // ); // Assuming you have a friends field in your User model
+      const friends = await db.Friends.findAll({
+        where: {
+          userID1: req.user.id,
+        },
+      });
+      
       for (const friendId of friends) {
         // Create a notification for each friend
+        // { pushToken, title, body, data }
+        const friend = await db.User.findByPk(friendId);
+        sendNotification({
+          pushToken: friend.expoPushToken,
+          title: "New WhatILearned",
+          body: `${req.user.fullName} has shared a new WhatILearned with you.`,
+          data: { whatILearnedID: whatILearned.id },
+        })
         await db.Notification.create({
           userID: friendId,
           content: `${req.user.fullName} has shared a new WhatILearned with you.`,
@@ -36,7 +50,7 @@ const addWhatIlearned = async (req, res) => {
       .status(201)
       .json({ message: "WhatIlearned entry created successfully", user });
   } catch (error) {
-    console.error("500 ",error);
+    console.error("500 ", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -67,9 +81,18 @@ const getWhatIlearned = async (req, res) => {
     const offset = (page - 1) * pageSize;
     const userID = req.user.id;
     const user = await db.User.findByPk(userID);
-    const friends = (user.friend ? JSON.parse(user.friend) : []).map((id) =>
-      parseInt(id.trim())
-    ); // Assuming you have a friends field in your User model
+    // const friends = (user.friend ? JSON.parse(user.friend) : []).map((id) =>
+    //   parseInt(id.trim())
+    // ); // Assuming you have a friends field in your User model
+    let friends = await db.Friends.findAll({
+      where: {
+        userID1: userID,
+      },
+    });
+    console.log(friends);
+    friends = friends.map((item) => {
+      return item.userID2;
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -170,6 +193,16 @@ const agreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Agreement removed successfully" });
     } else {
+
+      const author = await db.User.findByPk(whatILearned.author);
+      // sendNotification
+      sendNotification({
+        pushToken: author.expoPushToken,
+        title: "Agreement",
+        body: `${req.user.fullName} has agreed with your WhatILearned.`,
+        data: { whatILearnedID: whatILearned.id },
+      });
+
       await db.Notification.create({
         userID: whatILearned.author,
         content: `${req.user.fullName} has agreed with your WhatILearned.`,
@@ -246,6 +279,16 @@ const disagreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Disagreement removed successfully" });
     } else {
+
+      const author = await db.User.findByPk(whatILearned.author);
+      // sendNotification
+      sendNotification({
+        pushToken: author.expoPushToken,
+        title: "Disagreement",
+        body: `${req.user.fullName} has disagreed with your WhatILearned.`,
+        data: { whatILearnedID: whatILearned.id },
+      });
+
       await db.Notification.create({
         userID: whatILearned.author,
         content: `${req.user.fullName} has disagreed with your WhatILearned.`,
@@ -300,7 +343,7 @@ const reportWhatIlearned = async (req, res) => {
     }
 
     whatILearned.reportUser = whatILearned.reportUser
-      ? JSON.parse(whatILearned.reportUser)
+      ? whatILearned.reportUser
       : [];
 
     // Check if the user has already reported
@@ -316,6 +359,15 @@ const reportWhatIlearned = async (req, res) => {
       if (whatILearned.reportUser.length >= 5) {
         // Delete the WhatIlearned entry
         await whatILearned.destroy();
+
+        const author = await db.User.findByPk(whatILearned.author);
+        // sendNotification
+        sendNotification({
+          pushToken: author.expoPushToken,
+          title: "WhatILearned deleted",
+          body: `Your WhatIlearned has been deleted due to multiple reports.`,
+          data: { whatILearnedID: whatILearned.id },
+        });
 
         // Send a notification to the author
         await db.Notification.create({
@@ -333,6 +385,15 @@ const reportWhatIlearned = async (req, res) => {
         });
       } else {
         // Send a notification to the author
+        const author = await db.User.findByPk(whatILearned.author);
+        // sendNotification
+        sendNotification({
+          pushToken: author.expoPushToken,
+          title: "WhatILearned reported",
+          body: `Somebody has reported your WhatIlearned.`,
+          data: { whatILearnedID: whatILearned.id },
+        });
+
         await db.Notification.create({
           userID: whatILearned.author,
           content: "Somebody has reported your WhatIlearned.",
@@ -365,14 +426,21 @@ const addComment = async (req, res) => {
       whatIlearnedID,
     });
 
-    whatILearned.comment = whatILearned.comment
-      ? whatILearned.comment
-      : [];
+    // whatILearned.comment = whatILearned.comment ? whatILearned.comment : [];
 
-    await whatILearned.update({
-      comment: [...whatILearned.comment, comment.id],
+    // await whatILearned.update({
+    //   comment: [...whatILearned.comment, comment.id],
+    // });
+
+    const author = await db.User.findByPk(whatILearned.author);
+    // sendNotification
+    sendNotification({
+      pushToken: author.expoPushToken,
+      title: "New Comment",
+      body: `${req.user.fullName} has added comment to your WhatILearned.`,
+      data: { whatILearnedID: whatILearned.id },
     });
-
+    
     await db.Notification.create({
       userID: whatILearned.author,
       content: `${req.user.fullName} has added comment to your WhatILearned.`,

@@ -27,10 +27,12 @@ import { useRoute } from "@react-navigation/native";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { AntDesign } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import { Ionicons } from "@expo/vector-icons";
+
 
 export default ({ friend }) => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigate = useNavigation();
   const toast = useToast();
   const user = useSelector(selectUser);
 
@@ -92,15 +94,21 @@ export default ({ friend }) => {
       setLocation({ latitude: 1.35362, longitude: 103.84435 });
       getCityAndCountry(location.latitude, location.longitude);
 
-
       const response = await API.post("user/updateLocation", {
         latitude: 1.35362,
         longitude: 103.84435,
       });
-      toast.show(response.data.message, { duration: 5000, type: 'success', placement: 'bottom' });
-
+      toast.show(response.data.message, {
+        duration: 5000,
+        type: "success",
+        placement: "bottom",
+      });
     } catch (error) {
-      toast.show("   try later    ", { duration: 5000, type: 'danger', placement: 'bottom' });
+      toast.show("   try later    ", {
+        duration: 5000,
+        type: "danger",
+        placement: "bottom",
+      });
       console.log(error);
     }
   };
@@ -239,7 +247,6 @@ export default ({ friend }) => {
             type: "danger",
             placement: "bottom",
           });
-
         });
     }, [change, tabName])
   );
@@ -437,7 +444,7 @@ export default ({ friend }) => {
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
-       {/* <View
+      {/* <View
           style={{
             flexDirection: "row",
             justifyContent: "center",
@@ -469,7 +476,6 @@ export default ({ friend }) => {
           alignItems: "center",
         }}
       >
-       
         {/* {!friend ? (
           <TouchableOpacity>
             <Text
@@ -489,7 +495,7 @@ export default ({ friend }) => {
         ) : (
           <></>
         )} */}
- {!friend ? (
+        {!friend ? (
           <TouchableOpacity onPress={() => handlePickLocation()}>
             <Text
               style={{
@@ -525,6 +531,34 @@ export default ({ friend }) => {
               height: 80,
             }}
           ></Image>
+          {
+            friend&&
+             <Ionicons name="chatbubbles" size={24} color='rgba(67, 136, 204, 0.5)'
+             onPress={() => {
+                 navigate.navigate("whatilearned", {
+                     screen: "chat",
+                     params: {
+                     screen: "OneChat",
+                     params: {
+                         friendAvatar: friend?.friendAvatar,
+                         friendID: friend?.friendID,
+                         friendName: friend?.friendName,
+                        //  distance: distance.toFixed(2),
+                         isFollowed: friend?.isFollowed,
+                     },
+                     },
+                 });
+                 }
+             }
+             style={{marginTop: 20,
+                 alignSelf: "flex-end",
+                 position: "absolute",
+                 right:-90,
+                 bottom: 0,
+             }}
+             
+             />
+          }
         </View>
         {!friend ? (
           <TouchableOpacity onPress={() => pickImage()}>
@@ -629,7 +663,18 @@ export default ({ friend }) => {
             textAlign: "center",
           }}
         >
-          {followingCnt} Following, {followerCnt} Follower{" "}
+          {followingCnt < 1000
+            ? followingCnt
+            : followingCnt < 1000000
+            ? followingCnt / 1000 + "k"
+            : followingCnt / 1000000 + "m"}
+          {" "} Following,{" "}
+          {followerCnt < 1000
+            ? followerCnt
+            : followerCnt < 1000000
+            ? followerCnt / 1000 + "k"
+            : followerCnt / 1000000 + "m"}{" "}
+          Follower
         </Text>
       )}
 
@@ -648,7 +693,7 @@ export default ({ friend }) => {
       </Text>
 
       {friendsList.map((item) => renderFriend({ item }))}
-      <TouchableOpacity onPress={() => loadMoreData1()}>
+      {/* <TouchableOpacity onPress={() => loadMoreData1()}>
         <View
           style={{
             borderBottomColor: "#4388CC",
@@ -669,7 +714,7 @@ export default ({ friend }) => {
             More...
           </Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <Text
         style={{
@@ -686,21 +731,24 @@ export default ({ friend }) => {
 
       {whatilearnedList.map((item) => renderWhatIlearned({ item }))}
 
-      <TouchableOpacity onPress={() => loadMoreData2()}>
-        <Text
-          style={{
-            color: "#4388CC",
-            fontSize: 25,
-            marginTop: 15,
-            marginBottom: 50,
-            fontWeight: "700",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          More...
-        </Text>
-      </TouchableOpacity>
+      {
+      friend&&
+        <TouchableOpacity onPress={() => loadMoreData2()}>
+          <Text
+            style={{
+              color: "#4388CC",
+              fontSize: 25,
+              marginTop: 15,
+              marginBottom: 50,
+              fontWeight: "700",
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            More...
+          </Text>
+        </TouchableOpacity>
+      }
       {/* <FlatList
             data={friendsList}
             renderItem={renderFriend}

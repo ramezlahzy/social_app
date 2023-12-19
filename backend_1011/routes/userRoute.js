@@ -62,4 +62,5 @@ router.get("/getAgreeUserList", auth, userCtrl.getAgreeUserList);
 router.get("/getDisAgreeUserList", auth, userCtrl.getDisAgreeUserList);
 router.post("/updateLocation", auth, userCtrl.updateUserLocation);
 router.get("/getUserInfo", auth, userCtrl.getUserInfo);
+router.get("/getUserByPhoneNumber", userCtrl.getUserByPhoneNumber);
 module.exports = router;

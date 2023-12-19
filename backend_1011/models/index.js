@@ -26,7 +26,6 @@ fs.readdirSync(__dirname)
   });
 
 Object.keys(db).forEach(modelName => {
-  console.log("modelName: ", db[modelName].associate)
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
@@ -49,6 +48,13 @@ db.WhatIlearned.hasMany(db.Agrees, { foreignKey: 'whatIlearnedID' });
 
 db.DisAgrees.belongsTo(db.WhatIlearned, { foreignKey: 'whatIlearnedID' });
 db.WhatIlearned.hasMany(db.DisAgrees, { foreignKey: 'whatIlearnedID' });
+
+db.Friends.belongsTo(db.User, { foreignKey: 'userID1' });
+db.User.hasMany(db.Friends, { foreignKey: 'userID1' });
+
+db.Friends.belongsTo(db.User, { foreignKey: 'userID2' });
+db.User.hasMany(db.Friends, { foreignKey: 'userID2' });
+
 
 
 
