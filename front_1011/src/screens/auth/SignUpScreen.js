@@ -27,164 +27,167 @@ import Checkbox from "expo-checkbox";
 import { AntDesign } from "@expo/vector-icons";
 
 export default () => {
-  // const dispatch = useDispatch();
-  // const navigation = useNavigation();
-  // const toast = useToast();
-  // const [firstName, setFirstName] = useState("");
-  // const [lastName, setLastName] = useState("");
-  // const navigateToVerify = () => {
-  //   navigation.navigate("VerifyEmailForSignUp", { email, next: "Login" });
-  // };
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const toast = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const navigateToVerify = () => {
+    navigation.navigate("VerifyEmailForSignUp", { email, next: "Login" });
+  };
 
-  // //john
-  // const [location, setLocation] = useState();
-  // const [address, setAddress] = useState();
-  // const [city, setCity] = useState();
-  // const [country, setCountry] = useState();
-  // const [isTermsReaded, setIsTermsReaded] = useState(false);
-  // const [isPhotoUploaded, setIsPhotoUploaded] = useState(false);
-  // const [isNameSubmitted, setIsNameSubmitted] = useState(false);
-  // const [isLocationSubmitted, setIsLocationSubmitted] = useState(false);
+  //john
+  const [location, setLocation] = useState();
+  const [address, setAddress] = useState();
+  const [city, setCity] = useState();
+  const [country, setCountry] = useState();
+  const [isTermsReaded, setIsTermsReaded] = useState(false);
+  const [isPhotoUploaded, setIsPhotoUploaded] = useState(false);
+  const [isNameSubmitted, setIsNameSubmitted] = useState(false);
+  const [isLocationSubmitted, setIsLocationSubmitted] = useState(false);
 
-  // // const [location, setLocation] = useState(null);
-  // const [errorMsg, setErrorMsg] = useState(null);
-  // const [isChecked, setChecked] = useState(false);
-  // const [viewTerms, setViewTerms] = useState(false);
+  // const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isChecked, setChecked] = useState(false);
+  const [viewTerms, setViewTerms] = useState(false);
 
-  // const onSignUp = () => {
-  //   const userData = { firstName, lastName, email, username, password };
-  //   dispatch(registerUser(userData, navigateToVerify));
-  // };
-  // const [selectedImage, setSelectedImage] = useState("");
+  const onSignUp = () => {
+    const userData = { firstName, lastName, email, username, password };
+    dispatch(registerUser(userData, navigateToVerify));
+  };
+  const [selectedImage, setSelectedImage] = useState("");
 
-  // const pickImage = async () => {
-  //   const result = await ImagePicker.launchCameraAsync({
-  //     //john
-  //     // const result = await ImagePicker.launchImageLibraryAsync({
-  //     //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //     allowsEditing: true,
-  //     aspect: [1, 1], // Set the aspect ratio to 1:1 for a square image
-  //     quality: 1, // Image quality (0 to 1)
-  //   });
+  const pickImage = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      //john
+      // const result = await ImagePicker.launchImageLibraryAsync({
+      //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // Set the aspect ratio to 1:1 for a square image
+      quality: 1, // Image quality (0 to 1)
+    });
 
-  //   if (!result.canceled) {
-  //     // Handle the selected image (e.g., display it or upload it)
-  //     console.log(result.assets[0]);
-  //     setSelectedImage(result.assets[0].uri);
-  //     // You can set the selected image in state or upload it to a server here
-  //   }
-  // };
+    if (!result.canceled) {
+      // Handle the selected image (e.g., display it or upload it)
+      console.log(result.assets[0]);
+      setSelectedImage(result.assets[0].uri);
+      // You can set the selected image in state or upload it to a server here
+    }
+  };
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const { status } =
-  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
-  //     if (status !== "granted") {
-  //       alert("Sorry, we need camera roll permissions to make this work!");
-  //     }
-  //   })();
-  // }, []);
-  // const handleUpload = () => {
-  //   console.log(getTokenFromAyncStorage());
-  //   if (selectedImage) setIsPhotoUploaded(true);
-  // };
-  // const handleSubmitName = () => {
-  //   if (firstName && lastName) setIsNameSubmitted(true);
-  // };
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+    })();
+  }, []);
+  const handleUpload = () => {
+    console.log(getTokenFromAyncStorage());
+    if (selectedImage) setIsPhotoUploaded(true);
+  };
+  const handleSubmitName = () => {
+    if (firstName && lastName) setIsNameSubmitted(true);
+  };
 
-  // const getCityAndCountry = async (latitude, longitude) => {
-  //   let locationData = await Location.reverseGeocodeAsync({
-  //     latitude: location.latitude,
-  //     longitude: location.longitude,
-  //   });
-  //   if (locationData.length > 0) {
-  //     let city = locationData[0].city;
-  //     let country = locationData[0].country;
-  //     setCity(city);
-  //     setCountry(country);
-  //     console.log("City:", city);
-  //     console.log("Country:", country);
+  const getCityAndCountry = async (latitude, longitude) => {
+    let locationData = await Location.reverseGeocodeAsync({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+    if (locationData.length > 0) {
+      let city = locationData[0].city;
+      let country = locationData[0].country;
+      setCity(city);
+      setCountry(country);
+      console.log("City:", city);
+      console.log("Country:", country);
 
-  //     // You can save the city and country in your component's state or use it as needed
-  //   }
-  // };
+      // You can save the city and country in your component's state or use it as needed
+    }
+  };
 
-  // const handleSubmitLocation = async () => {
+  const handleSubmitLocation = async () => {
   
-  //   const phoneNumber = await AsyncStorage.getItem("phoneNumber");
-  //   console.log("City:", city);
-  //   console.log("Country:", country);
-  //   const userData = {
-  //     firstName,
-  //     lastName,
-  //     phoneNumber,
-  //     city: city,
-  //     country: country,
-  //     latitude: location.latitude,
-  //     longitude: location.longitude,
-  //   };
-  //   const formData = new FormData();
-  //   formData.append("avatar", {
-  //     uri: selectedImage,
-  //     name: "avatar.jpg",
-  //     type: "image/jpeg",
-  //   });
-  //   formData.append("userData", JSON.stringify(userData));
-  //   try {
-  //     const response = await API.post("user/addUser", formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-  //     dispatch(setUser(response.data.data));
-  //     toast.show(response.data.message, {
-  //       duration: 5000,
-  //       type: "success",
-  //       placement: "bottom",
-  //     });
-  //     navigation.navigate("whatilearned");
-  //   } catch (error) {
-  //     console.log(error);
-  //     if (error?.response?.data?.message) {
-  //       toast.show(error.response.data.message, {
-  //         duration: 5000,
-  //         type: "danger",
-  //         placement: "bottom",
-  //       });
-  //     }
-  //   }
-  // };
-  // const handlePickLocation = async () => {
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-  //   if (status !== "granted") {
-  //     setErrorMsg("Permission to access location was denied");
-  //     return;
-  //   }
-  //   try {
-  //     setLocation({ latitude: 1.35362, longitude: 103.84435 });
-  //     getCityAndCountry(location.latitude, location.longitude);
-  //     setIsLocationSubmitted(true);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+    const phoneNumber = await AsyncStorage.getItem("phoneNumber");
+    const expoPushToken = await AsyncStorage.getItem("expoPushToken");
+    console.log("expoPushToken:", expoPushToken);
+    console.log("City:", city);
+    console.log("Country:", country);
+    const userData = {
+      firstName,
+      lastName,
+      phoneNumber,
+      city: city,
+      country: country,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      expoPushToken,
+    };
+    const formData = new FormData();
+    formData.append("avatar", {
+      uri: selectedImage,
+      name: "avatar.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("userData", JSON.stringify(userData));
+    try {
+      const response = await API.post("user/addUser", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      dispatch(setUser(response.data.data));
+      toast.show(response.data.message, {
+        duration: 5000,
+        type: "success",
+        placement: "bottom",
+      });
+      navigation.navigate("whatilearned");
+    } catch (error) {
+      console.log(error);
+      if (error?.response?.data?.message) {
+        toast.show(error.response.data.message, {
+          duration: 5000,
+          type: "danger",
+          placement: "bottom",
+        });
+      }
+    }
+  };
+  const handlePickLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+      return;
+    }
+    try {
+      setLocation({ latitude: 1.35362, longitude: 103.84435 });
+      getCityAndCountry(location.latitude, location.longitude);
+      setIsLocationSubmitted(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  // const inputHandle = (type, text) => {
-  //   switch (type) {
-  //     case "firstName":
-  //       setFirstName(text);
-  //       break;
-  //     case "lastName":
-  //       setLastName(text);
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
+  const inputHandle = (type, text) => {
+    switch (type) {
+      case "firstName":
+        setFirstName(text);
+        break;
+      case "lastName":
+        setLastName(text);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
-      {/* <Modal
+      <Modal
         visible={viewTerms}
         animationType="slide"
         transparent={true}
@@ -663,7 +666,7 @@ export default () => {
           </TouchableOpacity>
           <BR />
         </View>
-      } */}
+      }
     </ScrollView>
   );
 };

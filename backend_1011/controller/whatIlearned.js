@@ -111,21 +111,21 @@ const getWhatIlearned = async (req, res) => {
         ],
       };
     }
-    if (shareWithFriend !== undefined && shareWithFriend === "true") {
+    if ( shareWithFriend === "true" ) {
       whereConditions.author = friends;
     }
 
     // Add the userID to the "shareWithWorldWide" condition
 
-    if (shareWithWorldWide !== undefined && shareWithWorldWide === "true") {
+    if (shareWithWorldWide === "true") {
       whereConditions.author = {
         [Op.and]: [{ [Op.notIn]: friends }, { [Op.not]: userID }],
       };
     }
-    if (!shareWithFriend && !shareWithWorldWide)
-      whereConditions.author = { [Op.not]: userID };
-    // Add a condition to check the length of the reportUser array
-    whereConditions.reportUser = {
+    // if (!shareWithFriend && !shareWithWorldWide)
+    //   whereConditions.author = {}//..{ [Op.not]: userID };
+
+      whereConditions.reportUser = {
       [Op.or]: [
         {
           reportUser: {
@@ -139,18 +139,43 @@ const getWhatIlearned = async (req, res) => {
     };
     const { count, rows } = await db.WhatIlearned.findAndCountAll({
       where: whereConditions,
-      limit: parseInt(pageSize, 10),
-      offset,
+      // limit: parseInt(pageSize, 10),
+      // offset,
       order: [["createdAt", "DESC"]], // Order by creation date, you can adjust as needed
       include: [
         {
           model: db.User,
-          attributes: ["avatar"], // Include only the 'avatar' attribute from the User model
+          attributes: ["avatar","country","city"], // Include only the 'avatar' attribute from the User model
         },
       ],
     });
+    // console.log(" rows is ",rows);
+    rows.forEach((item) => {
+      console.log("item is ", item.User);
+    })
+    //make if has the same city as user first and then the same country
+    const rowsWithSameCity = rows.filter((item) => {
+      return item.User.city === user.city;
+    }
+    );
+    const rowsWithSameCountry = rows.filter((item) => {
+      return item.User.country === user.country && item.User.city !== user.city;
+    }
+    );
+    const other=rows.filter((item) => {
+      return item.User.country !== user.country&&item.User.city !== user.city;
+    }
+    );
+    const rowsWithSameCityAndCountryAndOther = rowsWithSameCity.concat(rowsWithSameCountry,other)
+    //if dublicates return error
+    if(rowsWithSameCityAndCountryAndOther.length!==rows.length){
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    res.status(200).json({ count, page, pageSize, entries: rowsWithSameCityAndCountryAndOther });
+    console.log("rowsWithSameCityAndCountryAndOther is ",rowsWithSameCityAndCountryAndOther);
 
-    res.status(200).json({ count, page, pageSize, entries: rows });
+
+    // res.status(200).json({ count, page, pageSize, entries: rows });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

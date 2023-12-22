@@ -29,7 +29,7 @@ import { selectUser } from "../redux/selectors";
 import { useNavigation } from "@react-navigation/native";
 import Hyperlink from "react-native-hyperlink";
 import { FlatList } from "react-native-gesture-handler";
-export default ({ data, setChange, flag = true }) => {
+export default ({ data, setChange, flag = true, me }) => {
   const {
     isFollowed,
     AvatarImg,
@@ -79,15 +79,12 @@ export default ({ data, setChange, flag = true }) => {
     fetchUserAvatar();
   }, []);
 
-
   const fetchLikesNumber = async () => {
     try {
       const response = await API.get(
         `whatIlearned/getAgreeUserList?whatIlearnedID=${JSON.stringify(id)}`
       );
       setLikesNumber(response.data.userList.length);
-      // console.log("userId = ", user.id);
-      // console.log("response.data.userList = ", response.data.userList);
       if (response.data.userList.find((item) => item.userID === user.id)) {
         setAgreeFull(true);
       }
@@ -97,7 +94,6 @@ export default ({ data, setChange, flag = true }) => {
     }
   };
 
-  
   const fetchDislikesNumber = async () => {
     try {
       const response = await API.get(
@@ -107,7 +103,7 @@ export default ({ data, setChange, flag = true }) => {
       if (response.data.userList.find((item) => item.userID === user.id)) {
         setDisAgreeFull(true);
       }
-// 
+      //
       // console.log("dislikesNumber", response.data.userList.length);
     } catch (error) {
       console.log(error);
@@ -195,7 +191,7 @@ export default ({ data, setChange, flag = true }) => {
         }}
       >
         <View
-        style={{
+          style={{
             margin: 10,
             gap: 10,
           }}
@@ -213,11 +209,18 @@ export default ({ data, setChange, flag = true }) => {
           <Text style={styles.textNormal1}>{item.name}</Text>
         </View>
 
-        <Text style={[styles.textNormal3,{
-          flex: 1,
-          textAlign: "left",
-          marginLeft: 10,
-        }]}>{item.text}</Text>
+        <Text
+          style={[
+            styles.textNormal3,
+            {
+              flex: 1,
+              textAlign: "left",
+              marginLeft: 10,
+            },
+          ]}
+        >
+          {item.text}
+        </Text>
       </View>
     );
   };
@@ -286,15 +289,6 @@ export default ({ data, setChange, flag = true }) => {
 
   const agreeAPI = async () => {
     try {
-      // if(author === user.id){
-      //     if(showAgreeList === false){
-      //         const response = await API.get(`user/getAgreeUserList?agreeIDList=${JSON.stringify(agreeCnt)}`);
-      //         setAgreeList(response.data.userList)
-      //     }
-      //     setShowAgreeList(!showAgreeList);
-
-      // }
-      //  else
       {
         const response = await API.post("whatIlearned/agreeWhatIlearned", {
           whatIlearnedID: "" + id,
@@ -327,15 +321,6 @@ export default ({ data, setChange, flag = true }) => {
 
   const disAgreeAPI = async () => {
     try {
-      // if(author === user.id){
-      //     if(showDisAgreeList === false){
-      //         const response = await API.get(`user/getDisAgreeUserList?disagreeIDList=${JSON.stringify(disagreeCnt)}`);
-      //         setDisAgreeList(response.data.userList)
-      //     }
-      //     setShowDisAgreeList(!showDisAgreeList);
-      // }
-      // else
-
       {
         const response = await API.post("whatIlearned/disagreeWhatIlearned", {
           whatIlearnedID: "" + id,
@@ -365,7 +350,7 @@ export default ({ data, setChange, flag = true }) => {
   };
 
   const reportAPI = async () => {
-    try {      
+    try {
       const response = await API.post("whatIlearned/reportWhatIlearned", {
         whatIlearnedID: "" + id,
       });
@@ -597,84 +582,6 @@ export default ({ data, setChange, flag = true }) => {
         flex: 1,
       }}
     >
-      {/* {flag && (
-        <>
-          <TouchableOpacity
-            onPress={() => {
-              navigate.navigate("whatilearned", {
-                screen: "Friends",
-                params: { screen: "BY LOCATION", params: { flag: 1 } },
-              });
-            }}
-          >
-            <Image
-              source={{ uri: IMG_URL + AvatarImg }}
-              style={{
-                borderWidth: 3,
-                borderColor: isFollowed ? "#4388CC" : "#F31B1B",
-                borderRadius: 40,
-                width: 80,
-                height: 80,
-              }}
-            ></Image>
-          </TouchableOpacity>
-          <Text
-            style={{
-              color: "#4388CC",
-              fontSize: 16,
-              lineHeight: 18.4,
-              fontWeight: "700",
-              fontFamily: "ArialBold",
-              marginTop: 10,
-            }}
-          >
-            {name}
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
-            <TouchableOpacity disabled={isFollowed} onPress={() => followAPI()}>
-              <Text
-                style={{
-                  color: "#4388CC",
-                  fontSize: 16,
-                  lineHeight: 18.4,
-                  fontWeight: "700",
-                  marginRight: 25,
-                  fontFamily: "ArialBold",
-                  borderBottomColor: "#4388CC",
-                  borderBottomWidth: isFollowed ? 2 : 0,
-                }}
-              >
-                {isFollowed ? "Followed" : "Follow"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={!isFollowed}
-              onPress={() => followAPI()}
-            >
-              <Text
-                style={{
-                  color: "#F31B1B",
-                  fontSize: 16,
-                  lineHeight: 18.4,
-                  fontWeight: "700",
-                  fontFamily: "ArialBold",
-                  borderBottomColor: "#F31B1B",
-                  borderBottomWidth: !isFollowed ? 2 : 0,
-                }}
-              >
-                {isFollowed ? "unfollow" : "unfollowed"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )} */}
-
-      {/* user info */}
       <View
         style={{
           flexDirection: "row",
@@ -690,47 +597,51 @@ export default ({ data, setChange, flag = true }) => {
             alignItems: "center",
           }}
         >
-          <TouchableOpacity onPress={followAPI} disabled={isFollowedFull}>
-            <Text
-              style={{
-                color: "#4388CC",
-                fontSize: 16,
-                lineHeight: 18.4,
-                fontWeight: "700",
-                fontFamily: "ArialBold",
-                marginRight: 25,
-                opacity: isFollowedFull ? 0.5 : 1,
-              }}
-            >
-              Follow
-            </Text>
-          </TouchableOpacity>
+          {!me && (
+            <TouchableOpacity onPress={followAPI} disabled={isFollowedFull}>
+              <Text
+                style={{
+                  color: "#4388CC",
+                  fontSize: 16,
+                  lineHeight: 18.4,
+                  fontWeight: "700",
+                  fontFamily: "ArialBold",
+                  marginRight: 25,
+                  opacity: isFollowedFull ? 0.5 : 1,
+                }}
+              >
+                Follow
+              </Text>
+            </TouchableOpacity>
+          )}
           <Image
             source={{ uri: IMG_URL + authorAvatar }}
             style={{
-              borderWidth: 3,
-              borderColor: isFollowedFull ? "#4388CC" : "#F31B1B",
+              borderWidth: me ? 0 : 3,
+              borderColor:isFollowedFull ? "#4388CC" : "#F31B1B",
               borderRadius: 40,
               width: 50,
               height: 50,
               backgroundColor: "black",
             }}
           ></Image>
-          <TouchableOpacity onPress={followAPI} disabled={!isFollowedFull}>
-            <Text
-              style={{
-                color: "#F31B1B",
-                fontSize: 16,
-                lineHeight: 18.4,
-                fontWeight: "700",
-                fontFamily: "ArialBold",
-                marginLeft: 20,
-                opacity: !isFollowedFull ? 0.5 : 1,
-              }}
-            >
-              UnFollow
-            </Text>
-          </TouchableOpacity>
+          {!me && (
+            <TouchableOpacity onPress={followAPI} disabled={!isFollowedFull}>
+              <Text
+                style={{
+                  color: "#F31B1B",
+                  fontSize: 16,
+                  lineHeight: 18.4,
+                  fontWeight: "700",
+                  fontFamily: "ArialBold",
+                  marginLeft: 20,
+                  opacity: !isFollowedFull ? 0.5 : 1,
+                }}
+              >
+                UnFollow
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <Text
@@ -996,7 +907,6 @@ export default ({ data, setChange, flag = true }) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-
                 Alert.alert("Confirm", "Do you really want to report", [
                   {
                     text: "Ok",
@@ -1197,15 +1107,13 @@ export default ({ data, setChange, flag = true }) => {
             {commentList.map((item, index) => renderItem(item, index))}
           </ScrollView>
           <View
-          style={{
-            width: "100%",
-            height: 2,
-            marginVertical: 10,
-            backgroundColor: "#4388CC",
-          }}
-          
+            style={{
+              width: "100%",
+              height: 2,
+              marginVertical: 10,
+              backgroundColor: "#4388CC",
+            }}
           />
-
 
           <View
             style={{

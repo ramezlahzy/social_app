@@ -781,9 +781,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    //  alignItems: "center",
     paddingTop: 32,
-    // fontFamily: 'ArialBold'
   },
   input: {
     fontFamily: "ArialBold",

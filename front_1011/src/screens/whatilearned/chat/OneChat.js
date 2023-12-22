@@ -10,6 +10,24 @@ import API from "../../../redux/API";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Image } from "react-native";
 import { IMG_URL, API_BASE } from "../../../config";
+// import {format} from 'date-fns'
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { differenceInMinutes } from "date-fns";
+
+const timeAgo = (minutes) => {
+  if (minutes < 1) {
+    return "just now";
+  } else if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  } else if (minutes < 1440) {
+    const hours = Math.floor(minutes / 60);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  } else {
+    const days = Math.floor(minutes / 1440);
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
+  }
+};
+
 export default OneChat = ({ navigation }) => {
   const route = useRoute();
   const user = useSelector(selectUser);
@@ -24,7 +42,6 @@ export default OneChat = ({ navigation }) => {
       friendID,
     })
       .then((response) => {
-        console.log("response.data.messages", response.data.messages);
         setAllMessages(response.data.messages);
       })
       .catch((error) => {
@@ -65,26 +82,9 @@ export default OneChat = ({ navigation }) => {
         paddingVertical: 18,
         width: "100%",
         height: "100%",
+        backgroundColor: "white",
       }}
     >
-      {/* <View style={{flexDirection:'row',justifyContent:'space-between',width:'90%'}}>
-        <TouchableOpacity onPress={()=>navigation.goBack()}>
-        <MaterialCommunityIcons
-            name="arrow-left"
-            size={24}
-            color="#4388CC"
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={()=>navigation.navigate('Profile',{friendID})}>
-        <MaterialCommunityIcons
-
-            name="account-circle"
-            size={24}
-            color="#4388CC"
-            />
-        </TouchableOpacity>
-        </View> */}
-
       <FlatList
         data={allMessages}
         keyExtractor={(item, index) => index.toString()}
@@ -97,14 +97,32 @@ export default OneChat = ({ navigation }) => {
           marginBottom: 90,
         }}
         renderItem={({ item, index }) => {
+          const nowDate = new Date();
+          const minutes = -differenceInMinutes(item.createdAt, nowDate);
+          const getTime = timeAgo(minutes);
           return (
             <>
-            {index === 0 && (
+              {index === 0 && (
                 <View
-                    style={{
-                        alignSelf: "center",
-                    }}
+                  style={{
+                    alignSelf: "center",
+                  }}
                 >
+                  <Text
+                    style={{
+                      padding: 15,
+                      margin: 30,
+                      borderWidth: 3,
+                      borderColor: "#4388CC",
+                      color: "#4388CC",
+                      fontWeight: "700",
+                      fontSize: 20,
+                      textAlign: "center",
+                    }}
+                  >
+                    {friendName}
+                  </Text>
+                  {/* 
                   <Image
                     source={{ uri: IMG_URL + friendAvatar }}
                     style={{
@@ -124,35 +142,77 @@ export default OneChat = ({ navigation }) => {
                     }}
                   >
                     {friendName}
-                  </Text>
+                  </Text> */}
                 </View>
               )}
-              <Text
+
+              <View
+                key={index}
                 style={{
-                  alignSelf: "center",
-                  fontSize: 12,
-                  color: "grey",
+                  padding: 10,
+                  // borderRadius: 10,
+                  backgroundColor: "white",
+                  // item.fromUserID !== user.id ? "grey" : "#4388CC",
+                  // alignSelf:
+                  //   item.fromUserID === user.id ? "flex-end" : "flex-start",
+                  //from left to right
+                  display: "flex",
                   marginBottom: 10,
+                  borderColor:
+                    item.fromUserID !== user.id ? "#F31B1B" : "#4388CC",
+                  borderWidth: 3,
+                  width: "100%",
+                  display: "flex",
+                  minHeight: 105,
+                  flexDirection: item.fromUserID !== user.id ? "row" : "row-reverse",
+                  alignItems: "center",
                 }}
               >
-                    {item.createdAt}
-              </Text>
-            <View
-              key={index}
-              style={{
-                padding: 10,
-                borderRadius: 10,
-                backgroundColor:
-                  item.fromUserID !== user.id ? "grey" : "#4388CC",
-                alignSelf:
-                  item.fromUserID === user.id ? "flex-end" : "flex-start",
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ color: "#fff" }}>{item.message}</Text>
-            </View>
+                <View
+                  style={{
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    source={{ uri: IMG_URL + friendAvatar }}
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 50,
+                      backgroundColor: "grey",
+                      margin: 10,
+                      borderColor: "#4388CC",
+                      borderWidth: item.fromUserID !== user.id ? 3 : 0,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      alignSelf: "center",
+                      fontSize: 16,
+                      color: "#4388CC",
+                      marginBottom: 10,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {getTime}
+                  </Text>
+                </View>
+
+                <Text
+                  style={{
+                    color: item.fromUserID !== user.id ? "#F31B1B" : "#4388CC",
+                    fontWeight: 700,
+                    flex: 1,
+                    textAlign: "center",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {item.message}
+                </Text>
+              </View>
             </>
-            
           );
         }}
       />
@@ -187,11 +247,7 @@ export default OneChat = ({ navigation }) => {
     //     })}
     //   </View> */}
 
-<Text>
-    {
-        allMessages.length === 0 && 'No messages yet'
-    }
-</Text>
+      <Text>{allMessages.length === 0 && "No messages yet"}</Text>
       <View
         style={{
           flexDirection: "row",

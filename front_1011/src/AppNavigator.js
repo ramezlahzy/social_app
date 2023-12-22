@@ -1,17 +1,17 @@
 import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { StyleSheet, Image } from "react-native";
 import { ToastProvider } from "react-native-toast-notifications";
-import WhatIlearnedScreen from './screens/whatilearned/index.js'
+import WhatIlearnedScreen from "./screens/whatilearned/index.js";
 import store from "./redux/store";
 import LoginScreen from "./screens/auth/LoginScreen";
 import SignUpScreen from "./screens/auth/SignUpScreen";
-import InviteScreen from './screens/invite';
+import InviteScreen from "./screens/invite";
 import { Provider } from "react-redux";
-
-const Stack = createStackNavigator();
-
+import MainScreen from "./screens/main/index.js";
+import ProfileScreen from "./screens/profile/ProfileScreen.js";
+const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   return (
@@ -31,13 +31,18 @@ const AppNavigator = () => {
             />
             <Stack.Screen
               name="whatilearned"
-              component={WhatIlearnedScreen}
+              component={MainScreen}
               options={{ headerShown: false }}
             />
-          
+
             <Stack.Screen
               name="SignUp"
               component={SignUpScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -17,10 +17,25 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default ({ data }) => {
-  const { isFollowed, AvatarImg, name, distance, id } = data;
+  const { AvatarImg, name, distance, id } = data;
   const dispatch = useDispatch();
   const toast = useToast();
+  const [isFollowed, setIsFollowed] = React.useState(false);
   const navigate = useNavigation();
+  useEffect(() => {
+    API.get("user/checkUserFollow", { params: { userID: id } })
+      .then((response) => {
+        console.log("response.data.iswed", response.data.isFollowed);
+        if (response.data.isFollowed) {
+          setIsFollowed(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        console.log("error.response", error.response);
+      });
+  }, []);
+
   const followAPI = async () => {
     try {
       const response = await API.post("user/followUser", {
@@ -32,6 +47,7 @@ export default ({ data }) => {
         type: "success",
         placement: "bottom",
       });
+      setIsFollowed(!isFollowed);
     } catch (error) {
       if (error?.response?.data?.message) {
         toast.show(error.response.data.message, {
@@ -61,18 +77,12 @@ export default ({ data }) => {
       >
         <TouchableOpacity
           onPress={() => {
-            navigate.navigate("whatilearned", {
-              screen: "Friends",
-              params: {
-                screen: "BY LOCATION",
-                params: {
-                  friendAvatar: AvatarImg,
-                  friendID: id,
-                  friendName: name,
-                  distance: distance.toFixed(2),
-                  isFollowed,
-                },
-              },
+            navigate.navigate("Profile", {
+              friendAvatar: AvatarImg,
+              friendID: id,
+              friendName: name,
+              distance: distance.toFixed(2),
+              isFollowed,
             });
           }}
         >

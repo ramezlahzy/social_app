@@ -22,6 +22,7 @@ import { API_BASE } from "../../../config";
 import { selectUser } from '../../../redux/selectors';
 import { useRoute } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Toast } from "react-native-toast-notifications";
 export default ({flag}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -123,6 +124,11 @@ export default ({flag}) => {
         return tempList;
       } catch (error) {
         console.log(error)
+        Toast.show(error.data.message, {
+          duration: 5000,
+          type: "danger"
+        })
+
       }
     }
     const loadMoreData = async () => {

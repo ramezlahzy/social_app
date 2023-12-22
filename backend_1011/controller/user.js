@@ -42,6 +42,7 @@ const sendNotification = async ({ pushToken, title, body, data }) => {
 const getUserByPhoneNumber = async (req, res) => {
   try {
     const { phoneNumber } = req.query;
+    console.log("getUserByPhoneNumber",phoneNumber);
     const user = await db.User.findOne({ where: { phoneNumber } });
     console.log(user);
     if (user == null) {
@@ -526,7 +527,7 @@ const getMyFavoriteWhatIlearned = async (req, res) => {
 
     // Convert the whatIlearned IDs to an array of integers
     const whatIlearnedIDArray = (
-      user.favoriteWIL ? JSON.parse(user.favoriteWIL) : []
+      user.favoriteWIL ? user.favoriteWIL : []
     ).map((id) => parseInt(id.trim()));
 
     let whereConditions = {};
@@ -765,6 +766,32 @@ const getUserInfo = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const checkUserFollow =async (req,res)=>{
+  try {
+    console.log("checkUserFollow",req.query);
+    const {userID} = req.query;
+    const currentUserID = req.user.id;
+    console.log("userID",parseInt(userID));
+    console.log("currentUserID",currentUserID);
+    const friends = await db.Friends.findAll({
+      where: {
+        userID1: currentUserID,
+        userID2: parseInt(userID),
+      },
+    });
+
+    console.log("friends following ",friends);
+    if(friends.length>0){
+      res.status(200).json({isFollowed:true});
+    }
+    else{
+      res.status(200).json({isFollowed:false});
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
 module.exports = {
   add,
   generatePin,
@@ -788,4 +815,5 @@ module.exports = {
   getUserInfo,
   sendNotification,
   getUserByPhoneNumber,
+  checkUserFollow
 };

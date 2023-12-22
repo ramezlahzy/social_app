@@ -24,10 +24,10 @@ import {
   PhoneAuthProvider,
   signInWithCredential,
 } from "../../../firebase";
+
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 
-export default () => {
-  const navigation = useNavigation();
+export default ({ navigation }) => {
   const dispatch = useDispatch();
   const recaptchaVerifier = React.useRef(null);
   const [verificationId, setVerificationId] = React.useState();
@@ -36,20 +36,31 @@ export default () => {
   const [timer, setTimer] = useState(60);
   const [isResend, setIsResend] = useState(false);
 
-
   useEffect(() => {
-    // if(auth.currentUser){
-    //   navigation.navigate("whatilearned");
-    // }else
-    // navigation.navigate("SignUp")
+    if (auth.currentUser) {
+      console.log(
+        "existed phone number" + auth.currentUser.phoneNumber.replace("+", "")
+      );
+      API.get(
+        API_BASE +
+          `user/getUserByPhoneNumber?phoneNumber=${auth.currentUser.phoneNumber.replace(
+            "+",
+            ""
+          )}`
+      ).then((response) => {
+        console.log("response.data.user", response.data.user);
+        dispatch(setUser(response.data.user));
+        navigation.navigate("whatilearned");
+      }).catch((error) => {
+        console.log("error", error);
+        toast.show(`Eror: ${error.message}`, {
+          type: "danger",
+        });
+
+      });
+    } //else navigation.navigate("SignUp");
   }, []);
   const sendVerification = async () => {
-    if(true)
-    {
-      
-      navigation.navigate("SignUp")
-      return;
-    }
     try {
       const phoneNumber = countryCode + phone;
       const phoneProvider = new PhoneAuthProvider(auth);
@@ -94,45 +105,26 @@ export default () => {
         verificationId,
         verificationCode
       );
-      signInWithCredential(auth, credential)
-        .then(async (result) => {
-          console.log(result);
-          console.log(result.user);
-          console.log(result.user.phoneNumber);
-          console.log(result.user.uid);
-          console.log(result.user.displayName);
-          console.log(result.user.email);
-          API.get(
-            API_BASE +
-              `user/getUserByPhoneNumber?phoneNumber=${
-                countryCode.substring(countryCode.indexOf("+") + 1) + phone
-              }`
-          )
-            .then((response) => {
-              if (response.data.user) {
-                dispatch(setUser(response.data.user));
-                navigation.navigate("whatilearned");
-              } else {
-                navigation.navigate("SignUp");
-              }
-              toast.show("Phone authentication successful ", {
-                type: "success",
-              });
-            })
-            .catch((error) => {
-              console.log(error);
-              toast.show(`Error: ${error.message}`, {
-                type: "danger",
-              });
-            });
-        })
-        .catch((error) => {
-          toast.show(`Error: ${error.message}`, {
-            type: "danger",
-          });
 
-          console.log(error);
-        });
+      const result = await signInWithCredential(auth, credential);
+      const user = result.user;
+      console.log("user  ", user);
+      const phone_number =
+        countryCode.substring(countryCode.indexOf("+") + 1) + phone;
+      const response = await API.get(
+        API_BASE + `user/getUserByPhoneNumber?phoneNumber=${phone_number}`
+      );
+      await AsyncStorage.setItem("phoneNumber", phone_number);
+
+      if (response.data.user) {
+        dispatch(setUser(response.data.user));
+        navigation.navigate("whatilearned");
+      } else {
+        navigation.navigate("SignUp");
+      }
+      toast.show("Phone authentication successful ", {
+        type: "success",
+      });
     } catch (err) {
       toast.show(`Error: ${err.message}`, {
         type: "danger",
@@ -218,7 +210,6 @@ export default () => {
       <FirebaseRecaptchaVerifierModal
         ref={recaptchaVerifier}
         firebaseConfig={app.options}
-        attemptInvisibleVerification={true}
       />
       <View style={styles.phoneForm}>
         <View

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-//import { StatusBar } from 'expo-status-bar';
 import { StatusBar, StyleSheet, Text, View } from "react-native";
 import store from "./src/redux/store";
 import AppNavigator from "./src/AppNavigator";
@@ -13,6 +12,7 @@ import Constants from "expo-constants";
 import { Button } from "react-native";
 import API from "./src/redux/API";
 import { Toast } from "react-native-toast-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -69,12 +69,12 @@ export default function App() {
       <SafeAreaProvider>
         <View style={styles.container}>
           <AppNavigator />
-          <Button
+          {/* <Button
             title="Press to schedule a notification"
             onPress={async () => {
               await schedulePushNotification(expoPushToken);
             }}
-          />
+          /> */}
           <StatusBar style="auto" hidden={false} backgroundColor="#ffcc33" />
         </View>
       </SafeAreaProvider>
@@ -147,7 +147,7 @@ async function schedulePushNotification(expoPushToken) {
   // });
 }
 
-async function registerForPushNotificationsAsync() {
+export async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
@@ -179,6 +179,7 @@ async function registerForPushNotificationsAsync() {
       })
     ).data;
     console.log(token);
+    await AsyncStorage.setItem("expoPushToken", token);
   } else {
     alert("Must use physical device for Push Notifications");
   }
