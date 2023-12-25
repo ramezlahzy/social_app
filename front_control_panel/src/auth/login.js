@@ -52,7 +52,7 @@ const LoginScreen = ({ navigation }) => {
     console.log("useEffect");
     auth.onAuthStateChanged((user) => {
       if (user) {
-        navigation.navigate("MainScreen");
+        navigation.navigate("Main");
       }
     }
     );

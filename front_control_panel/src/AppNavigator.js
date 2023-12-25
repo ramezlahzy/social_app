@@ -11,10 +11,100 @@ import Users from "./screen/users";
 import Notification from "./screen/notification";
 import WhatILearned from "./screen/whatILearned";
 import Reported from "./screen/reported";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { Entypo } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
+
+const TopTabNavigator = createMaterialTopTabNavigator();
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+  const Main = () => {
+    return (
+      <TopTabNavigator.Navigator>
+        <TopTabNavigator.Screen
+          name="MainScreen"
+          component={MainScreen}
+          options={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="home"
+                size={24}
+                color={focused ? "#F31B1B" : "#4388CC"}
+              />
+            ),
+          }}
+        />
+     
+        <TopTabNavigator.Screen
+          name="Users"
+          component={Users}
+          options={{
+            headerShown: true,
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="users"
+                size={24}
+                color={focused ? "#F31B1B" : "#4388CC"}
+              />
+            ),
+          }}
+        />
+
+        <TopTabNavigator.Screen
+          name="Notification"
+          component={Notification}
+          options={{
+            headerShown: true,
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <AntDesign
+                name="notification"
+                size={24}
+                color={focused ? "#F31B1B" : "#4388CC"}
+              />
+            ),
+          }}
+        />
+        <TopTabNavigator.Screen
+          name="WhatILearned"
+          component={WhatILearned}
+          options={{
+            headerShown: true,
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="open-book"
+                size={24}
+                color={focused ? "#F31B1B" : "#4388CC"}
+              />
+            ),
+          }}
+        />
+        <TopTabNavigator.Screen
+          name="Reported"
+          component={Reported}
+          options={{
+            headerShown: true,
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <Entypo
+                name="warning"
+                size={24}
+                color={focused ? "#F31B1B" : "#4388CC"}
+              />
+            ),
+          }}
+        />
+
+       
+      </TopTabNavigator.Navigator>
+    );
+  };
   return (
     <Provider store={store}>
       <ToastProvider>
@@ -26,32 +116,11 @@ const AppNavigator = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="MainScreen"
-              component={MainScreen}
+              name="Main"
+              component={Main}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="Users"
-              component={Users}
-              options={{ headerShown: true }}
-            />
-            <Stack.Screen
-              name="Notification"
-              component={Notification}
-              options={{ headerShown: true }}
-            />
-            <Stack.Screen
-              name="WhatILearned"
-              component={WhatILearned}
-              options={{ headerShown: true }}
-            />
-               <Stack.Screen
-              name="Reported"
-              component={Reported}
-              options={{ headerShown: true }}
-            />
-            
-            
+          
           </Stack.Navigator>
         </NavigationContainer>
       </ToastProvider>
