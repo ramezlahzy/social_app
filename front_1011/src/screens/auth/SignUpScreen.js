@@ -45,7 +45,7 @@ export default () => {
   const [isPhotoUploaded, setIsPhotoUploaded] = useState(false);
   const [isNameSubmitted, setIsNameSubmitted] = useState(false);
   const [isLocationSubmitted, setIsLocationSubmitted] = useState(false);
-
+  // setIsLocationSubmitted(false)
   // const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isChecked, setChecked] = useState(false);
@@ -74,13 +74,18 @@ export default () => {
       // You can set the selected image in state or upload it to a server here
     }
   };
+  useEffect(()=>{
+    console.log('s')
+    setIsLocationSubmitted(false)
+    setLocation()
+  },[])
 
   useEffect(() => {
     (async () => {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        alert("Sorry, we need camera roll permissions to make this work!");
+        alert("Sorry , we need camera roll permissions to make this work!");
       }
     })();
   }, []);
@@ -94,23 +99,21 @@ export default () => {
 
   const getCityAndCountry = async (latitude, longitude) => {
     let locationData = await Location.reverseGeocodeAsync({
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: latitude,
+      longitude: longitude,
     });
     if (locationData.length > 0) {
-      let city = locationData[0].city;
+      let city = locationData[0].region;
       let country = locationData[0].country;
-      setCity(city);
-      setCountry(country);
-      console.log("City:", city);
-      console.log("Country:", country);
 
-      // You can save the city and country in your component's state or use it as needed
+      return {
+        city,
+        country,
+      };
     }
   };
 
   const handleSubmitLocation = async () => {
-  
     const phoneNumber = await AsyncStorage.getItem("phoneNumber");
     const expoPushToken = await AsyncStorage.getItem("expoPushToken");
     console.log("expoPushToken:", expoPushToken);
@@ -164,8 +167,21 @@ export default () => {
       return;
     }
     try {
-      setLocation({ latitude: 1.35362, longitude: 103.84435 });
-      getCityAndCountry(location.latitude, location.longitude);
+      let location = await Location.getCurrentPositionAsync({});
+      const cityCountry = await getCityAndCountry(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+      console.log(cityCountry);
+      console.log('locatiosn ',location)
+      // if (!location) {
+        setLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        setCity(cityCountry.city);
+        setCountry(cityCountry.country);
+      // } else 
       setIsLocationSubmitted(true);
     } catch (error) {
       console.log(error);
@@ -548,16 +564,16 @@ export default () => {
           </View>
           {isLocationSubmitted ? (
             <>
-            <AntDesign name="checkcircle" size={24} color="green" />
-            <Text
-              style={{
-                color: "#4388CC",
-                fontSize: 15,
-                margin: 10,
-                fontWeight: "700",
-                fontFamily: "ArialBold",
-                textAlign: "center",
-              }}
+              <AntDesign name="checkcircle" size={24} color="green" />
+              <Text
+                style={{
+                  color: "#4388CC",
+                  fontSize: 15,
+                  margin: 10,
+                  fontWeight: "700",
+                  fontFamily: "ArialBold",
+                  textAlign: "center",
+                }}
               >
                 {city}, {country}
                 {"\n"}
@@ -565,7 +581,7 @@ export default () => {
                 longitude: {location?.longitude}
               </Text>
             </>
-             ) : (
+          ) : (
             <TouchableOpacity
               style={styles.locationButton}
               onPress={handlePickLocation}
@@ -584,7 +600,9 @@ export default () => {
                     location?.latitude +
                     ", " +
                     "Long : " +
-                    location?.longitude
+                    location?.longitude +
+                    city +
+                    country
                   : "PICK CURRENT LOCATION"}
               </Text>
             </TouchableOpacity>

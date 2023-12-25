@@ -4,6 +4,7 @@ const config = require('./config');
 const app = express();
 
 const userRoute = require('./routes/userRoute');
+const adminRoute= require('./routes/adminRoute');
 const whatIlearnedRoute = require('./routes/whatilearnedRoute');
 const messageRoute = require('./routes/messageRoute');
 const notificationRoute = require('./routes/notificationRoute');
@@ -27,11 +28,13 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use('/user', accessLog, userRoute);
+app.use('/user', accessLog,auth,userRoute);
 app.use('/whatIlearned', accessLog,  auth, whatIlearnedRoute);
 
 app.use('/message', accessLog, auth, messageRoute);
 
+// app.use('/admin', accessLog, auth, require('./routes/adminRoute'));
+app.use('/admin', adminRoute);
 app.use('/notification', accessLog, auth, notificationRoute);
 app.listen(config.PORT, () => {
   console.log(`Listening at http://localhost:${config.PORT}`);

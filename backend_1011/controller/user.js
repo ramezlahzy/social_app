@@ -7,10 +7,12 @@ const { send } = require("./notification");
 // const
 let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
-const sendNotification = async ({ pushToken, title, body, data }) => {
+ const sendNotification = async ({ pushToken, title, body, data }) => {
   if (!Expo.isExpoPushToken(pushToken)) {
+    console.log("Invalid Expo Push Token",pushToken);
     return { error: "Invalid Expo Push Token" };
   }
+  console.log("sendNotificati  on",pushToken);
 
   const messages = [
     {
@@ -44,9 +46,9 @@ const getUserByPhoneNumber = async (req, res) => {
     const { phoneNumber } = req.query;
     console.log("getUserByPhoneNumber",phoneNumber);
     const user = await db.User.findOne({ where: { phoneNumber } });
-    console.log(user);
+    console.log("user IS  ",user);
     if (user == null) {
-      res.status(200).json({ message: "User not found" });
+        res.status(200).json({ message: "User not found" });
     } else
       res.status(200).json({ message: "Get user info successfully", user });
   } catch (error) {
@@ -497,8 +499,8 @@ const getMyWhatIlearned = async (req, res) => {
     whereConditions.author = userID;
     const { count, rows } = await db.WhatIlearned.findAndCountAll({
       where: whereConditions,
-      limit: parseInt(pageSize, 10),
-      offset,
+      // limit: parseInt(pageSize, 10),
+      // offset,
       order: [["createdAt", "DESC"]], // Order by creation date, you can adjust as needed
     });
     res.status(200).json({
@@ -815,5 +817,6 @@ module.exports = {
   getUserInfo,
   sendNotification,
   getUserByPhoneNumber,
-  checkUserFollow
+  checkUserFollow,
+  sendNotification
 };

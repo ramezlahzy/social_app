@@ -27,6 +27,8 @@ const getAllMessages = async (req, res) => {
 };
 
 const getLastMessages = async (req, res) => {
+try{
+  
   const userID = req.user.id;
   const user = await db.User.findOne({ where: { id: userID } });
   const messages = await db.Messages.findAll({
@@ -76,6 +78,11 @@ const getLastMessages = async (req, res) => {
   });
   console.log("lastMessage", lastMessages);
   return res.json({ success: true, messages: lastMessages });
+  
+}catch{
+  return res.json({ success: false });
+ 
+}
 };
 module.exports = {
   add,

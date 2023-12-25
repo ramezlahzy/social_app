@@ -38,26 +38,34 @@ export default ({ navigation }) => {
 
   useEffect(() => {
     if (auth.currentUser) {
+      const phoneNumber = auth.currentUser.phoneNumber.replace("+", "");
       console.log(
-        "existed phone number" + auth.currentUser.phoneNumber.replace("+", "")
+        "existed phon e     numbers   " + phoneNumber
       );
+      
       API.get(
         API_BASE +
-          `user/getUserByPhoneNumber?phoneNumber=${auth.currentUser.phoneNumber.replace(
-            "+",
-            ""
-          )}`
-      ).then((response) => {
-        console.log("response.data.user", response.data.user);
-        dispatch(setUser(response.data.user));
-        navigation.navigate("whatilearned");
-      }).catch((error) => {
-        console.log("error", error);
-        toast.show(`Eror: ${error.message}`, {
-          type: "danger",
+          `user/getUserByPhoneNumber?phoneNumber=${phoneNumber}`
+      )
+        .then((response) => {
+          console.log("respdose.data.user", response.data.user);
+          if(response.data.user){
+            if (response.data.user.blocked) {
+              toast.show("you are blocked", { type: "danger" });
+            }
+            dispatch(setUser(response.data.user));
+            navigation.navigate("whatilearned");
+          }else{
+            navigation.navigate("SignUp");
+          }
+         
+        })
+        .catch((error) => {
+          console.log("error", error);
+          toast.show(`Eror: ${error.message}`, {
+            type: "danger",
+          });
         });
-
-      });
     } //else navigation.navigate("SignUp");
   }, []);
   const sendVerification = async () => {
@@ -111,14 +119,22 @@ export default ({ navigation }) => {
       console.log("user  ", user);
       const phone_number =
         countryCode.substring(countryCode.indexOf("+") + 1) + phone;
+        console.log("phone_number  ", phone_number);  
       const response = await API.get(
         API_BASE + `user/getUserByPhoneNumber?phoneNumber=${phone_number}`
       );
       await AsyncStorage.setItem("phoneNumber", phone_number);
-
+      console.log("response.data.user", response.data.user);
       if (response.data.user) {
-        dispatch(setUser(response.data.user));
-        navigation.navigate("whatilearned");
+        if (response.data.user.blocked) {
+          toast.show("you are blocked", {
+            type: "danger",
+          });
+          return;
+        } else {
+          dispatch(setUser(response.data.user));
+          navigation.navigate("whatilearned");
+        }
       } else {
         navigation.navigate("SignUp");
       }
@@ -245,6 +261,7 @@ export default ({ navigation }) => {
             value={phone}
             keyboardType="number-pad"
             placeholder="PHONE"
+            maxLength={10}
             onChangeText={(text) => inputHandle("phone", text)}
           />
         </View>

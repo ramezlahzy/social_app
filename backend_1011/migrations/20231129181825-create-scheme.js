@@ -90,18 +90,18 @@ module.exports = {
       authorName: {
         type: Sequelize.STRING,
       },
-      agree: {
-        type: Sequelize.JSON,
-      },
-      disagree: {
-        type: Sequelize.JSON,
-      },
-      comment: {
-        type: Sequelize.JSON, // Assuming it's an array of Comment IDs
-      },
-      reportUser: {
-        type: Sequelize.JSON, // Assuming it's an array of User IDs
-      },
+      // agree: {
+      //   type: Sequelize.JSON,
+      // },
+      // disagree: {
+      //   type: Sequelize.JSON,
+      // },
+      // comment: {
+      //   type: Sequelize.JSON, // Assuming it's an array of Comment IDs
+      // },
+      // reportUser: {
+      //   type: Sequelize.JSON, // Assuming it's an array of User IDs
+      // },
       shareWithFriend: {
         type: Sequelize.BOOLEAN,
       },
@@ -158,8 +158,11 @@ module.exports = {
       favoriteWIL: {
         type: Sequelize.JSON,
       },
-      friend: {
-        type: Sequelize.JSON,
+      // friend: {
+      //   type: Sequelize.JSON,
+      // },
+      blocked: {
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,
@@ -267,6 +270,28 @@ module.exports = {
           type: Sequelize.DATE,
         },
       });
+    await queryInterface.createTable("Reports", {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER,
+      },
+      whatIlearnedID: {
+        type: Sequelize.INTEGER, // Assuming it's a foreign key to WhatIlearned
+      },
+      userID: {
+        type: Sequelize.INTEGER, // Assuming it's a foreign key to User
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+    });
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("Users");
@@ -278,5 +303,6 @@ module.exports = {
     await queryInterface.dropTable("Agrees");
     await queryInterface.dropTable("DisAgrees");
     await queryInterface.dropTable("Messages");
+    await queryInterface.dropTable("Reports");
   },
 };

@@ -24,18 +24,18 @@ module.exports = (sequelize, DataTypes) => {
         authorName: {
             type: DataTypes.STRING
         },
-        agree: {
-            type: DataTypes.JSON,
-        },
-        disagree: {
-            type: DataTypes.JSON,
-        },
-        comment: {
-            type: DataTypes.JSON, // Assuming it's an array of Comment IDs
-        },
-        reportUser: {
-            type: DataTypes.JSON, // Assuming it's an array of User IDs
-        },
+        // agree: {
+        //     type: DataTypes.JSON,
+        // },
+        // disagree: {
+        //     type: DataTypes.JSON,
+        // },
+        // comment: {
+        //     type: DataTypes.JSON, // Assuming it's an array of Comment IDs
+        // },
+        // reportUser: {
+        //     type: DataTypes.JSON, // Assuming it's an array of User IDs
+        // },
         shareWithFriend: {
             type: DataTypes.BOOLEAN,
         },

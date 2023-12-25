@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "jsEngine": "hermes",
+
+    "name": "SocialApp",
+    "slug": "socialapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.socialapp.client",
+      "googleServicesFile": "./google-services.json"
+
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7cee062a-4389-4cd8-b2f4-1618fef7f8cb"
+      }
+    }
+  }
+}

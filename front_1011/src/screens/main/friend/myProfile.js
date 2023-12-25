@@ -88,7 +88,6 @@ const MyProfile = () => {
   const pickImage = async () => {
     if (selectedImage === IMG_URL + user.avatar) {
       const result = await ImagePicker.launchCameraAsync({
-
         allowsEditing: true,
         aspect: [1, 1], // Set the aspect ratio to 1:1 for a square image
         quality: 1, // Image quality (0 to 1)
@@ -184,27 +183,27 @@ const MyProfile = () => {
         console.log("err5", err);
       });
 
-  
     //   console.log("user avatar ",user.avatar)
     // if (user) setSelectedImage(IMG_URL + user.avatar);
   };
   useEffect(() => {
     refresh();
+    console.log("here the user",user)
   }, []);
   const [refreshing, setRefreshing] = useState(false);
-    const onRefresh = React.useCallback(() => {
-        // setRefreshing(true);
-        refresh();
-        // setRefreshing(false);
-    }, []);
+  const onRefresh = React.useCallback(() => {
+    // setRefreshing(true);
+    refresh();
+    // setRefreshing(false);
+  }, []);
 
   return (
-    <ScrollView style={styles.container} scrollEventThrottle={16}
-    // onrefresh={refresh}
-    //on refresh control
-    refreshControl={
+    <ScrollView
+      style={styles.container}
+      scrollEventThrottle={16}
+      refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    }
+      }
     >
       <View
         style={{

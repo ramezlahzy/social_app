@@ -12,9 +12,11 @@ module.exports = (req, res, next) => {
       if(!decodedToken||!decodedToken.phone_number) return res.status(401).json({ message: "Unauthorized" });
       let phoneNumber = decodedToken.phone_number;
       phoneNumber = phoneNumber.replace("+", "");
+      console.log(phoneNumber)
       db.User.findOne({ where: { phoneNumber } })
         .then((existOne) => {
           req.user = existOne;
+          console.log("exist one is ",existOne)
           next();
         })
         .catch((error) => {

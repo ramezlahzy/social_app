@@ -1,40 +1,32 @@
 const db = require("../models");
 const { Op } = require("sequelize");
-const {sendNotification} = require("./user");
+const { sendNotification } = require("./user");
 const { send } = require("./notification");
 const addWhatIlearned = async (req, res) => {
   try {
     const { content, shareWithFriend, shareWithWorldWide } = req.body;
-
-    // Create a new WhatILearned entry and associate it with the user
-    const whatILearned = await db.WhatIlearned.create({
+   const whatILearned = await db.WhatIlearned.create({
       content,
       shareWithFriend,
       shareWithWorldWide,
       author: req.user.id,
       authorName: req.user.fullName,
     });
-    // Notify friends if shareWithFriend is true
     if (shareWithFriend) {
-      // const friends = (req.user.friend ? req.user.friend : []).map((id) =>
-      //   parseInt(id.trim())
-      // ); // Assuming you have a friends field in your User model
       const friends = await db.Friends.findAll({
         where: {
           userID1: req.user.id,
         },
       });
-      
+
       for (const friendId of friends) {
-        // Create a notification for each friend
-        // { pushToken, title, body, data }
         const friend = await db.User.findByPk(friendId);
         sendNotification({
           pushToken: friend.expoPushToken,
           title: "New WhatILearned",
           body: `${req.user.fullName} has shared a new WhatILearned with you.`,
           data: { whatILearnedID: whatILearned.id },
-        })
+        });
         await db.Notification.create({
           userID: friendId,
           content: `${req.user.fullName} has shared a new WhatILearned with you.`,
@@ -42,7 +34,6 @@ const addWhatIlearned = async (req, res) => {
           data: whatILearned.id,
           viewed: false,
         });
-        // You can send the actual notifications here (e.g., push notifications, emails, etc.)
       }
     }
     const user = await db.User.findByPk(req.user.id);
@@ -81,9 +72,6 @@ const getWhatIlearned = async (req, res) => {
     const offset = (page - 1) * pageSize;
     const userID = req.user.id;
     const user = await db.User.findByPk(userID);
-    // const friends = (user.friend ? JSON.parse(user.friend) : []).map((id) =>
-    //   parseInt(id.trim())
-    // ); // Assuming you have a friends field in your User model
     let friends = await db.Friends.findAll({
       where: {
         userID1: userID,
@@ -111,71 +99,54 @@ const getWhatIlearned = async (req, res) => {
         ],
       };
     }
-    if ( shareWithFriend === "true" ) {
+    if (shareWithFriend === "true") {
       whereConditions.author = friends;
     }
 
-    // Add the userID to the "shareWithWorldWide" condition
 
     if (shareWithWorldWide === "true") {
       whereConditions.author = {
         [Op.and]: [{ [Op.notIn]: friends }, { [Op.not]: userID }],
       };
     }
-    // if (!shareWithFriend && !shareWithWorldWide)
-    //   whereConditions.author = {}//..{ [Op.not]: userID };
-
-      whereConditions.reportUser = {
-      [Op.or]: [
-        {
-          reportUser: {
-            [Op.and]: [
-              db.Sequelize.literal("JSON_LENGTH(reportUser) < 5"), // Check if the JSON array has less than 5 elements
-            ],
-          },
-        },
-        { [Op.eq]: null }, // Include entries with a null reportUser
-      ],
-    };
     const { count, rows } = await db.WhatIlearned.findAndCountAll({
       where: whereConditions,
-      // limit: parseInt(pageSize, 10),
-      // offset,
       order: [["createdAt", "DESC"]], // Order by creation date, you can adjust as needed
       include: [
         {
           model: db.User,
-          attributes: ["avatar","country","city"], // Include only the 'avatar' attribute from the User model
+          attributes: ["avatar", "country", "city"], // Include only the 'avatar' attribute from the User model
         },
       ],
     });
     // console.log(" rows is ",rows);
     rows.forEach((item) => {
       console.log("item is ", item.User);
-    })
+    });
     //make if has the same city as user first and then the same country
     const rowsWithSameCity = rows.filter((item) => {
       return item.User.city === user.city;
-    }
-    );
+    });
     const rowsWithSameCountry = rows.filter((item) => {
       return item.User.country === user.country && item.User.city !== user.city;
-    }
+    });
+    const other = rows.filter((item) => {
+      return item.User.country !== user.country && item.User.city !== user.city;
+    });
+    let rowsWithSameCityAndCountryAndOther = rowsWithSameCity.concat(
+      rowsWithSameCountry,
+      other
     );
-    const other=rows.filter((item) => {
-      return item.User.country !== user.country&&item.User.city !== user.city;
-    }
-    );
-    const rowsWithSameCityAndCountryAndOther = rowsWithSameCity.concat(rowsWithSameCountry,other)
-    //if dublicates return error
-    if(rowsWithSameCityAndCountryAndOther.length!==rows.length){
+
+    if (rowsWithSameCityAndCountryAndOther.length !== rows.length) {
       return res.status(500).json({ message: "Internal server error" });
     }
-    res.status(200).json({ count, page, pageSize, entries: rowsWithSameCityAndCountryAndOther });
-    console.log("rowsWithSameCityAndCountryAndOther is ",rowsWithSameCityAndCountryAndOther);
-
-
-    // res.status(200).json({ count, page, pageSize, entries: rows });
+    res.status(200).json({
+      count,
+      page,
+      pageSize,
+      entries: rowsWithSameCityAndCountryAndOther,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -192,17 +163,6 @@ const agreeWhatIlearned = async (req, res) => {
     if (!whatILearned) {
       return res.status(404).json({ message: "WhatIlearned entry not found" });
     }
-    // Check if the user has already agreed
-    whatILearned.agree = whatILearned.agree
-      ? JSON.parse(whatILearned.agree)
-      : [];
-    whatILearned.disagree = whatILearned.disagree
-      ? JSON.parse(whatILearned.disagree)
-      : [];
-
-    //get all tables in db
-
-    // const aag=db.DisAgrees.findByPk(whatIlearnedID)
     const agree = await db.Agrees.findOne({
       where: {
         userID: userID,
@@ -218,7 +178,6 @@ const agreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Agreement removed successfully" });
     } else {
-
       const author = await db.User.findByPk(whatILearned.author);
       // sendNotification
       sendNotification({
@@ -241,29 +200,6 @@ const agreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Agreement recorded successfully" });
     }
-    // console.log(agree)
-    // if (whatILearned.agree && whatILearned.agree.includes(userID)) {
-    //   return res.status(404).json({ message: "Agreement recorded already" });
-    // } else
-    {
-      // Add user to the 'agree' array
-      // const agree=db.Agree.create({
-      //   userID:userID,
-      //   whatIlearnedID:whatIlearnedID
-      // })
-      // console.log(agree)
-      // await whatILearned.update({
-      //   agree: [...whatILearned.agree, userID],
-      // });
-    }
-    // if (whatILearned.disagree && whatILearned.disagree.includes(userID)) {
-    //   // Remove user from the 'disagree' array
-    //   await whatILearned.update({
-    //     disagree: whatILearned.disagree.filter((id) => id !== userID),
-    //   });
-    // }
-
-    // res.status(200).json({ message: "Agreement recorded successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -304,7 +240,6 @@ const disagreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Disagreement removed successfully" });
     } else {
-
       const author = await db.User.findByPk(whatILearned.author);
       // sendNotification
       sendNotification({
@@ -327,30 +262,7 @@ const disagreeWhatIlearned = async (req, res) => {
       });
       res.status(200).json({ message: "Disagreement recorded successfully" });
     }
-
-    // if (whatILearned.disagree && whatILearned.disagree.includes(userID)) {
-    //   return res.status(404).json({ message: "Disagreement recorded already" });
-    // } else {
-    //   // Add user to the 'agree' array
-    //   await whatILearned.update({
-    //     disagree: [...whatILearned.disagree, userID],
-    //   });
-    //   await db.Notification.create({
-    //     userID: whatILearned.author,
-    //     content: `${req.user.fullName} has disagreed with your WhatILearned.`,
-    //     type: "WhatILearned disagreed",
-    //     data: whatILearned.id,
-    //     viewed: false,
-    //   });
-    // }
-    // if (whatILearned.agree && whatILearned.agree.includes(userID)) {
-    //   // Remove user from the 'agree' array
-    //   await whatILearned.update({
-    //     agree: whatILearned.agree.filter((id) => id !== userID),
-    //   });
-    // }
-    // res.status(200).json({ message: "Disagreement recorded successfully" });
-  } catch (error) {
+ } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -367,26 +279,30 @@ const reportWhatIlearned = async (req, res) => {
       return res.status(404).json({ message: "WhatIlearned entry not found" });
     }
 
-    whatILearned.reportUser = whatILearned.reportUser
-      ? whatILearned.reportUser
-      : [];
+    const report = await db.Reports.findOne({
+      where: {
+        userID: userID,
+        whatIlearnedID: whatIlearnedID,
+      },
+    });
 
-    // Check if the user has already reported
-    if (whatILearned.reportUser.includes(userID)) {
+    if (report) {
       return res.status(404).json({ message: "Reported already" });
     } else {
-      // Update the reportUser array
-      await whatILearned.update({
-        reportUser: [...whatILearned.reportUser, userID],
+      await db.Reports.create({
+        userID: userID,
+        whatIlearnedID: whatIlearnedID,
       });
-
-      // Check if the WhatIlearned entry has been reported 5 times
-      if (whatILearned.reportUser.length >= 5) {
-        // Delete the WhatIlearned entry
-        await whatILearned.destroy();
-
+      const reportsForThatpost = await db.Reports.findAll({
+        whatILearnedID: whatIlearnedID,
+      });
+      if (reportsForThatpost.length >= 5) {
+        await db.WhatIlearned.destroy({
+          where: {
+            id: whatIlearnedID,
+          },
+        });
         const author = await db.User.findByPk(whatILearned.author);
-        // sendNotification
         sendNotification({
           pushToken: author.expoPushToken,
           title: "WhatILearned deleted",
@@ -394,7 +310,6 @@ const reportWhatIlearned = async (req, res) => {
           data: { whatILearnedID: whatILearned.id },
         });
 
-        // Send a notification to the author
         await db.Notification.create({
           userID: whatILearned.author,
           content:
@@ -465,7 +380,7 @@ const addComment = async (req, res) => {
       body: `${req.user.fullName} has added comment to your WhatILearned.`,
       data: { whatILearnedID: whatILearned.id },
     });
-    
+
     await db.Notification.create({
       userID: whatILearned.author,
       content: `${req.user.fullName} has added comment to your WhatILearned.`,
