@@ -126,7 +126,6 @@ export default ({ data, setChange, flag = true, me }) => {
     API.get(`user/getUserInfo?id=${author}`)
       .then((res) => {
         setAuthorData(res.data.user);
-        // console.log("authorData", res.data.user);
       })
       .catch((err) => {
         console.log("err");
@@ -688,6 +687,8 @@ export default ({ data, setChange, flag = true, me }) => {
             flexDirection: "column",
             justifyContent: "space-around",
             opacity: 0,
+            // marginRight:10,
+            // paddingRight:10
           }}
         >
           <TouchableOpacity>
@@ -953,16 +954,18 @@ export default ({ data, setChange, flag = true, me }) => {
           style={{
             marginLeft: !flag ? 7 : 0,
             marginTop: 13,
-            // maxHeight: 376,
-            //   overflow: 'hidden',
             flexDirection: "column",
             justifyContent: "space-around",
             opacity: !flag ? 1 : 0,
+          
           }}
         >
           <TouchableOpacity
             onPress={() => {
               showSaveAlert();
+            }}
+            style={{
+              
             }}
           >
             <Text style={styles.textNormal3}>{!isEdit ? "edit" : "save"}</Text>

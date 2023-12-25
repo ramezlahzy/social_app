@@ -51,9 +51,9 @@ module.exports = (sequelize, DataTypes) => {
       city: {
         type: DataTypes.STRING,
       },
-      favoriteWIL: {
-        type: DataTypes.JSON, // Assuming it's an array of WhatIlearned IDs
-      },
+      // favoriteWIL: {
+      //   type: DataTypes.JSON, // Assuming it's an array of WhatIlearned IDs
+      // },
       // friend: {
       //   type: DataTypes.JSON, // Assuming it's an array of Friend User IDs
       // },

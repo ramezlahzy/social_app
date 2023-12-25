@@ -16,7 +16,6 @@ module.exports = (req, res, next) => {
       db.User.findOne({ where: { phoneNumber } })
         .then((existOne) => {
           req.user = existOne;
-          console.log("exist one is ",existOne)
           next();
         })
         .catch((error) => {

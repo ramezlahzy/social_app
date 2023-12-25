@@ -15,12 +15,15 @@ const addWhatIlearned = async (req, res) => {
     if (shareWithFriend) {
       const friends = await db.Friends.findAll({
         where: {
-          userID1: req.user.id,
+          userID2: req.user.id,
         },
       });
 
       for (const friendId of friends) {
-        const friend = await db.User.findByPk(friendId);
+        // console.log("friendId ",friendId)
+        const friend = await db.User.findByPk(friendId.userID1);
+
+
         sendNotification({
           pushToken: friend.expoPushToken,
           title: "New WhatILearned",

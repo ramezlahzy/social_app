@@ -7,12 +7,12 @@ const { send } = require("./notification");
 // const
 let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
- const sendNotification = async ({ pushToken, title, body, data }) => {
+const sendNotification = async ({ pushToken, title, body, data }) => {
   if (!Expo.isExpoPushToken(pushToken)) {
-    console.log("Invalid Expo Push Token",pushToken);
+    console.log("Invalid Expo Push Token", pushToken);
     return { error: "Invalid Expo Push Token" };
   }
-  console.log("sendNotificati  on",pushToken);
+  console.log("sendNotificati  on", pushToken);
 
   const messages = [
     {
@@ -44,11 +44,11 @@ let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 const getUserByPhoneNumber = async (req, res) => {
   try {
     const { phoneNumber } = req.query;
-    console.log("getUserByPhoneNumber",phoneNumber);
+    console.log("getUserByPhoneNumber", phoneNumber);
     const user = await db.User.findOne({ where: { phoneNumber } });
-    console.log("user IS  ",user);
+    console.log("user IS  ", user);
     if (user == null) {
-        res.status(200).json({ message: "User not found" });
+      res.status(200).json({ message: "User not found" });
     } else
       res.status(200).json({ message: "Get user info successfully", user });
   } catch (error) {
@@ -57,17 +57,33 @@ const getUserByPhoneNumber = async (req, res) => {
   }
 };
 const add = (req) =>
-  new Promise((resolve, reject) => {
+  new Promise(async (resolve, reject) => {
     let userInfo = JSON.parse(req.body.userData);
     userInfo["fullName"] = userInfo["firstName"] + " " + userInfo["lastName"];
     userInfo["avatar"] = req.files[0].filename;
-    db.User.create(userInfo)
-      .then((users) => {
-        resolve(users);
-      })
-      .catch((error) => {
-        reject(error);
-      });
+    const latitude = parseFloat(userInfo.latitude);
+    const longitude = parseFloat(userInfo.longitude);
+    const city = userInfo.city;
+    const country = userInfo.country;
+
+    const users =await db.User.create(userInfo)
+      // .then((users) => {
+      //   resolve(users)
+      //   console.log("users ",users);
+      // })
+      // .catch((error) => {
+      //   reject(error);
+      // });
+      resolve(users)
+
+      console.log("user",users)
+    db.Locations.create({
+      userID: users.id,
+      latitude,
+      longitude,
+      city,
+      country,
+    });
   });
 
 // const sendNot
@@ -230,14 +246,17 @@ const setFavorite = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("before parse", user.favoriteWIL);
+    const favourite = await db.Favourites.findOne({
+      where: { userID: userID, whatIlearnedID: whatIlearnedID },
+    });
+    console.log("favourite", favourite);
 
-    user.favoriteWIL = user.favoriteWIL ? user.favoriteWIL : [];
-
-    console.log("after parse ", user.favoriteWIL);
-    if (user.favoriteWIL.includes(whatIlearnedID)) {
-      await user.update({
-        favoriteWIL: user.favoriteWIL.filter((id) => id != whatIlearnedID),
+    if (favourite) {
+      // await user.update({
+      //   favoriteWIL: user.favoriteWIL.filter((id) => id != whatIlearnedID),
+      // });
+      await db.Favourites.destroy({
+        where: { userID: userID, whatIlearnedID: whatIlearnedID },
       });
       const author = await db.User.findByPk(whatILearned.author);
 
@@ -257,8 +276,9 @@ const setFavorite = async (req, res) => {
       });
       res.status(200).json({ message: "Set as unfavorite successfully", user });
     } else {
-      await user.update({
-        favoriteWIL: [...user.favoriteWIL, whatIlearnedID],
+      await db.Favourites.create({
+        userID: userID,
+        whatIlearnedID: whatIlearnedID,
       });
 
       const author = await db.User.findByPk(whatILearned.author);
@@ -528,9 +548,9 @@ const getMyFavoriteWhatIlearned = async (req, res) => {
     }
 
     // Convert the whatIlearned IDs to an array of integers
-    const whatIlearnedIDArray = (
-      user.favoriteWIL ? user.favoriteWIL : []
-    ).map((id) => parseInt(id.trim()));
+    const whatIlearnedIDArray = (user.favoriteWIL ? user.favoriteWIL : []).map(
+      (id) => parseInt(id.trim())
+    );
 
     let whereConditions = {};
 
@@ -749,6 +769,11 @@ const updateUserLocation = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     await user.update({ latitude, longitude });
+
+    await db.Locations.update(
+      { latitude, longitude },
+      { where: { userID: userID } }
+    );
     res.status(200).json({ message: "Location updated successfully", user });
   } catch (error) {
     console.error(error);
@@ -768,13 +793,13 @@ const getUserInfo = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-const checkUserFollow =async (req,res)=>{
+const checkUserFollow = async (req, res) => {
   try {
-    console.log("checkUserFollow",req.query);
-    const {userID} = req.query;
+    console.log("checkUserFollow", req.query);
+    const { userID } = req.query;
     const currentUserID = req.user.id;
-    console.log("userID",parseInt(userID));
-    console.log("currentUserID",currentUserID);
+    console.log("userID", parseInt(userID));
+    console.log("currentUserID", currentUserID);
     const friends = await db.Friends.findAll({
       where: {
         userID1: currentUserID,
@@ -782,18 +807,17 @@ const checkUserFollow =async (req,res)=>{
       },
     });
 
-    console.log("friends following ",friends);
-    if(friends.length>0){
-      res.status(200).json({isFollowed:true});
-    }
-    else{
-      res.status(200).json({isFollowed:false});
+    console.log("friends following ", friends);
+    if (friends.length > 0) {
+      res.status(200).json({ isFollowed: true });
+    } else {
+      res.status(200).json({ isFollowed: false });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 module.exports = {
   add,
   generatePin,
@@ -818,5 +842,5 @@ module.exports = {
   sendNotification,
   getUserByPhoneNumber,
   checkUserFollow,
-  sendNotification
+  sendNotification,
 };
